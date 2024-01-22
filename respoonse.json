@@ -1,0 +1,93 @@
+{
+  "response": [
+    {
+      "text": "Verily he [i.e., Jesus) is a portent of the Hour.",
+      "score": 4.180628,
+      "metadata": [
+        { "name": "title", "value": "4386\n" },
+        { "name": "lang", "value": "eng" },
+        { "name": "section", "value": "4385" },
+        { "name": "offset", "value": "0" },
+        { "name": "len", "value": "49" }
+      ],
+      "corpus_key": { "corpus_id": 12 }
+    },
+    {
+      "text": "(Jesus had said): \"Indeed Allah is my Lord and your Lord, so serve Him alone.",
+      "score": 3.6240892,
+      "metadata": [
+        { "name": "title", "value": "2286\n" },
+        { "name": "lang", "value": "eng" },
+        { "name": "section", "value": "2285" },
+        { "name": "offset", "value": "0" },
+        { "name": "len", "value": "77" }
+      ],
+      "corpus_key": { "corpus_id": 12 }
+    },
+    {
+      "text": "Believers, become Allah's helpers, as Jesus, son of Mary, said to the disciples: “Who is my helper in (calling people) to Allah?”",
+      "score": 3.6165738,
+      "metadata": [
+        { "name": "title", "value": "5177\n" },
+        { "name": "lang", "value": "eng" },
+        { "name": "section", "value": "5176" },
+        { "name": "offset", "value": "0" },
+        { "name": "len", "value": "129" }
+      ],
+      "corpus_key": { "corpus_id": 12 }
+    },
+    {
+      "text": "This is Jesus, the son of Mary; and this is the truth about him concerning which they are in doubt.",
+      "score": 3.483472,
+      "metadata": [
+        { "name": "title", "value": "2284\n" },
+        { "name": "lang", "value": "eng" },
+        { "name": "section", "value": "2283" },
+        { "name": "offset", "value": "0" },
+        { "name": "len", "value": "99" }
+      ],
+      "corpus_key": { "corpus_id": 12 }
+    },
+    {
+      "text": "And when Jesus perceived their leaning towards unbelief, he asked: 'Who will be my helpers in the way of Allah?'",
+      "score": 3.2713108,
+      "metadata": [
+        { "name": "title", "value": "345\n" },
+        { "name": "lang", "value": "eng" },
+        { "name": "section", "value": "344" },
+        { "name": "offset", "value": "0" },
+        { "name": "len", "value": "112" }
+      ],
+      "corpus_key": { "corpus_id": 12 }
+    }
+  ],
+  "document": [
+    {
+      "id": "tanzil.md",
+      "metadata": [
+        { "name": "draft", "value": "false" },
+        { "name": "date", "value": "\"2023‑11‑17\"" },
+        { "name": "author", "value": "Khaid Ansari" },
+        {
+          "name": "description",
+          "value": "English translation of Quran based on Khalid Ansari's interpritation"
+        },
+        { "name": "categories", "value": "Book, Islam" },
+        { "name": "tags", "value": "English Quran" },
+        { "name": "featured", "value": "true" },
+        { "name": "weight", "value": "1" },
+        { "name": "noTitle", "value": "false" },
+        { "name": "url", "value": "tanzil.md" },
+        { "name": "title", "value": "Quran Translation" }
+      ]
+    }
+  ],
+  "summary": [
+    {
+      "text": "Jesus, also known as the son of Mary, is a significant figure in various religious beliefs. He is regarded as a portent of the Hour [1] and has proclaimed Allah as his Lord [2]. Jesus called upon believers to serve Allah alone [2] and asked for helpers in spreading the message of Allah [3][5]. The truth about Jesus is a subject of doubt and discussion [4]. His teachings and actions have left an impact on the followers of different faiths [3]. Please note that the search results provided limited information, and for a more comprehensive understanding of Jesus, it is recommended to explore additional sources.",
+      "lang": "eng",
+      "future_id": 2
+    }
+  ],
+  "future_id": 1
+}

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Query Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        form {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 16px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #response-container {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        pre {
+            white-space: pre-wrap;
+        }
+
+        .popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    background-color: white;
+    border: 1px solid #ddd;
+    z-index: 1;
+    max-width: 80%; /* Set a maximum width */
+    max-height: 80vh; /* Set a maximum height */
+    overflow-y: auto; /* Enable vertical scrolling if needed */
+}
+
+
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1;
+}
+
+    </style>
+</head>
+<body>
+
+    <h1>Query Form</h1>
+
+    <form id="queryForm">
+        <label for="searchQuery">Search Query:</label>
+        <input type="text" id="searchQuery" name="searchQuery" required>
+
+        <button type="button" onclick="submitQuery()">Submit Query</button>
+    </form>
+
+    <div id="response-container"></div>
+    <div id="processing-indicator" style="display: none;">Processing...</div>
+    <div class="overlay" onclick="closePopup()"></div>
+    <div id="popup" class="popup"></div>
+
+   <!-- ... (previous HTML code) ... -->
+
+<script>
+    var globalResponse;  // Define a global variable to store the response
+
+    function submitQuery() {
+    // Show processing indicator
+    var processingIndicator = document.getElementById("processing-indicator");
+    processingIndicator.style.display = "block";
+
+    var searchQuery = document.getElementById("searchQuery").value;
+
+    // Your API endpoint for submitting queries
+    var apiUrl = "http://localhost:5050/query";
+
+    // Construct the request
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", apiUrl, true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+
+    // Define what happens on successful data submission
+    xhr.onload = function () {
+        // Hide processing indicator regardless of success or error
+        processingIndicator.style.display = "none";
+
+        if (xhr.status === 200) {
+            // Parse the JSON response and store it globally
+            globalResponse = JSON.parse(xhr.responseText);
+
+            // Display the response in the response container
+            displayResponse(globalResponse);
+        } else {
+            console.error("Error:", xhr.statusText);
+        }
+    };
+
+    // Define what happens in case of an error
+    xhr.onerror = function () {
+        console.error("Request failed");
+
+        // Hide processing indicator on error
+        processingIndicator.style.display = "none";
+    };
+
+    // Prepare the request payload
+    var payload = {
+        searchQuery: searchQuery
+    };
+
+    // Send the request with the payload
+    xhr.send(JSON.stringify(payload));
+
+    // Prevent form submission
+    return false;
+}
+
+
+function displayResponse(response) {
+    var responseContainer = document.getElementById("response-container");
+    responseContainer.innerHTML = "";
+
+    // Display summary with links
+    var summaryText = response.summary[0].text;
+    var summaryWithLinks = summaryText.replace(/\[\d+\]/g, function (match) {
+        var index = parseInt(match.match(/\d+/)[0]) - 1;
+        return `<a href="javascript:void(0);" onclick="openPopup(${index})">${match}</a>`;
+    });
+
+    responseContainer.innerHTML += "<p>" + summaryWithLinks + "</p>";
+
+    // Add document URL and value at the bottom of summary
+    var documentList = response.document;
+
+    
+    documentList.forEach(function (documentInfo, index) {
+        var documentId = documentInfo.id || "Document ID not available";
+        var urlElement = documentInfo.metadata.find(function (element) {
+            return element.name === "url";
+        });
+        var documentUrl = urlElement ? urlElement.value : "#";
+
+        // Change <p> to <a> with href set to document URL
+        responseContainer.innerHTML += `<a href="${documentUrl}" target="_blank">${index + 1} ${documentId}</a>`;
+    });
+}
+
+
+
+    function openPopup(index) {
+        var popup = document.getElementById("popup");
+
+        // Use the globally stored response
+        popup.innerHTML = "<pre>" + JSON.stringify(globalResponse.response[index], null, 2) + "</pre>";
+        popup.style.display = "block";
+
+        var overlay = document.querySelector(".overlay");
+        overlay.style.display = "block";
+    }
+
+    function closePopup() {
+        var popup = document.getElementById("popup");
+        popup.style.display = "none";
+
+        var overlay = document.querySelector(".overlay");
+        overlay.style.display = "none";
+    }
+</script>
+
+<!-- ... (remaining HTML code) ... -->
+
+</body>
+</html>
