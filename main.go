@@ -10,8 +10,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
 	"google.golang.org/grpc"
@@ -21,6 +19,7 @@ import (
 )
 
 var (
+	conn           *grpc.ClientConn
 	addr           = flag.String("addr", "serving.vectara.io:443", "the address to connect to")
 	customerID     = "2523211369" // Replace with your actual customer ID
 	int_customerID = 2523211369
@@ -46,48 +45,24 @@ type QueryResponse struct {
 }
 
 func main() {
-	flag.Parse()
-
 	// Initialize gRPC client
-	conn, err := initializeGRPCClient()
+	var err error
+	conn, err = initializeGRPCClient()
 	if err != nil {
 		log.Fatalf("Failed to initialize gRPC client: %v", err)
 	}
-	defer conn.Close()
 
-	// Setup HTTP server
+	// Register HTTP handler
+	http.HandleFunc("/query", queryHandler)
 
-	mux := http.NewServeMux()
-
-	// Serve static files from the "public" folder
-	mux.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir("public"))))
-	mux.Handle("/query", enableCORS(http.HandlerFunc(queryVectara)))
-
-	server := &http.Server{
-		Addr:    serverAddr,
-		Handler: mux,
+	// Start the server
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "5050"
 	}
 
-	// Handle graceful shutdown
-	go func() {
-		sigint := make(chan os.Signal, 1)
-		signal.Notify(sigint, os.Interrupt, syscall.SIGTERM)
-		<-sigint
-
-		log.Println("Shutting down server...")
-		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(shutdownSec)*time.Second)
-		defer cancel()
-
-		if err := server.Shutdown(ctx); err != nil {
-			log.Printf("Error during server shutdown: %v\n", err)
-		}
-	}()
-
-	// Start HTTP server
-	log.Printf("Server listening on %s\n", serverAddr)
-	if err := server.ListenAndServe(); err != http.ErrServerClosed {
-		log.Fatalf("Error starting server: %v", err)
-	}
+	log.Printf("Server listening on :%s\n", port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 func initializeGRPCClient() (*grpc.ClientConn, error) {
 	// Load TLS credentials
@@ -109,6 +84,57 @@ func initializeGRPCClient() (*grpc.ClientConn, error) {
 	}
 
 	return conn, nil
+}
+
+// ... (previous code)
+// ... (previous code)
+
+func queryHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodOptions {
+		// Respond to preflight requests
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "POST")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Add CORS headers
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+	var payload QueryPayload
+	err := json.NewDecoder(r.Body).Decode(&payload)
+	if err != nil {
+		http.Error(w, "Error decoding JSON payload", http.StatusBadRequest)
+		return
+	}
+
+	// Access the searchQuery from the payload
+	searchQuery := payload.SearchQuery
+	log.Printf("searchQuery?" + searchQuery)
+	result, err := callVectara(searchQuery)
+	if err != nil {
+		log.Printf("Error calling Vectara: %v", err)
+		http.Error(w, fmt.Sprintf("Error calling Vectara: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	jsonResponse, err := json.Marshal(result)
+	if err != nil {
+		log.Printf("Error marshaling JSON response: %v", err)
+		http.Error(w, fmt.Sprintf("Error marshaling JSON response: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonResponse)
 }
 
 func queryVectara(w http.ResponseWriter, r *http.Request) {

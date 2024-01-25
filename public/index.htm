@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -47,34 +48,37 @@
         }
 
         .popup {
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    padding: 20px;
-    background-color: white;
-    border: 1px solid #ddd;
-    z-index: 1;
-    max-width: 80%; /* Set a maximum width */
-    max-height: 80vh; /* Set a maximum height */
-    overflow-y: auto; /* Enable vertical scrolling if needed */
-}
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background-color: white;
+            border: 1px solid #ddd;
+            z-index: 1;
+            max-width: 80%;
+            /* Set a maximum width */
+            max-height: 80vh;
+            /* Set a maximum height */
+            overflow-y: auto;
+            /* Enable vertical scrolling if needed */
+        }
 
 
-.overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1;
-}
-
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1;
+        }
     </style>
 </head>
+
 <body>
 
     <h1>Query Form</h1>
@@ -91,115 +95,162 @@
     <div class="overlay" onclick="closePopup()"></div>
     <div id="popup" class="popup"></div>
 
-   <!-- ... (previous HTML code) ... -->
+    <!-- ... (previous HTML code) ... -->
 
-<script>
-    var globalResponse;  // Define a global variable to store the response
+    <script>
+        var globalResponse;  // Define a global variable to store the response
 
-    function submitQuery() {
-    // Show processing indicator
-    var processingIndicator = document.getElementById("processing-indicator");
-    processingIndicator.style.display = "block";
+        function submitQuery() {
+            // Show processing indicator
+            var processingIndicator = document.getElementById("processing-indicator");
+            processingIndicator.style.display = "block";
 
-    var searchQuery = document.getElementById("searchQuery").value;
+            var searchQuery = document.getElementById("searchQuery").value;
 
-    // Your API endpoint for submitting queries
-    var apiUrl = "http://localhost:5050/query";
+            // Your API endpoint for submitting queries
+            var apiUrl = "http://localhost:5050/query";
 
-    // Construct the request
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", apiUrl, true);
-    xhr.setRequestHeader("Content-Type", "application/json");
+            // Construct the request
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", apiUrl, true);
+            xhr.setRequestHeader("Content-Type", "application/json");
 
-    // Define what happens on successful data submission
-    xhr.onload = function () {
-        // Hide processing indicator regardless of success or error
-        processingIndicator.style.display = "none";
+            // Define what happens on successful data submission
+            xhr.onload = function () {
+                // Hide processing indicator regardless of success or error
+                processingIndicator.style.display = "none";
 
-        if (xhr.status === 200) {
-            // Parse the JSON response and store it globally
-            globalResponse = JSON.parse(xhr.responseText);
+                if (xhr.status === 200) {
+                    // Parse the JSON response and store it globally
+                    globalResponse = JSON.parse(xhr.responseText);
 
-            // Display the response in the response container
-            displayResponse(globalResponse);
-        } else {
-            console.error("Error:", xhr.statusText);
+                    // Display the response in the response container
+                    displayResponse(globalResponse);
+                } else {
+                    console.error("Error:", xhr.statusText);
+                }
+            };
+
+            // Define what happens in case of an error
+            xhr.onerror = function () {
+                console.error("Request failed");
+
+                // Hide processing indicator on error
+                processingIndicator.style.display = "none";
+            };
+
+            // Prepare the request payload
+            var payload = {
+                searchQuery: searchQuery
+            };
+
+            // Send the request with the payload
+            xhr.send(JSON.stringify(payload));
+
+            // Prevent form submission
+            return false;
         }
-    };
-
-    // Define what happens in case of an error
-    xhr.onerror = function () {
-        console.error("Request failed");
-
-        // Hide processing indicator on error
-        processingIndicator.style.display = "none";
-    };
-
-    // Prepare the request payload
-    var payload = {
-        searchQuery: searchQuery
-    };
-
-    // Send the request with the payload
-    xhr.send(JSON.stringify(payload));
-
-    // Prevent form submission
-    return false;
-}
 
 
-function displayResponse(response) {
-    var responseContainer = document.getElementById("response-container");
-    responseContainer.innerHTML = "";
+        function displayResponse(response) {
+            var responseContainer = document.getElementById("response-container");
+            responseContainer.innerHTML = "";
 
-    // Display summary with links
-    var summaryText = response.summary[0].text;
-    var summaryWithLinks = summaryText.replace(/\[\d+\]/g, function (match) {
-        var index = parseInt(match.match(/\d+/)[0]) - 1;
-        return `<a href="javascript:void(0);" onclick="openPopup(${index})">${match}</a>`;
-    });
+            // Display summary with links
+            var summaryText = response.summary[0].text;
+            var summaryWithLinks = summaryText.replace(/\[\d+\]/g, function (match) {
+                var index = parseInt(match.match(/\d+/)[0]) - 1;
+                return `<a href="javascript:void(0);" onclick="openPopup(${index})">${match}</a>`;
+            });
 
-    responseContainer.innerHTML += "<p>" + summaryWithLinks + "</p>";
+            responseContainer.innerHTML += "<p>" + summaryWithLinks + "</p>";
 
-    // Add document URL and value at the bottom of summary
-    var documentList = response.document;
-
-    
-    documentList.forEach(function (documentInfo, index) {
-        var documentId = documentInfo.id || "Document ID not available";
-        var urlElement = documentInfo.metadata.find(function (element) {
-            return element.name === "url";
-        });
-        var documentUrl = urlElement ? urlElement.value : "#";
-
-        // Change <p> to <a> with href set to document URL
-        responseContainer.innerHTML += `<a href="${documentUrl}" target="_blank">${index + 1} ${documentId}</a>`;
-    });
-}
+            // Add document URL and value at the bottom of summary
+            var documentList = response.document;
 
 
+            documentList.forEach(function (documentInfo, index) {
+                var documentId = documentInfo.id || "Document ID not available";
+                var urlElement = documentInfo.metadata.find(function (element) {
+                    return element.name === "url";
+                });
+                var documentUrl = urlElement ? urlElement.value : "#";
 
-    function openPopup(index) {
-        var popup = document.getElementById("popup");
+                // Change <p> to <a> with href set to document URL
+                responseContainer.innerHTML += `<a href="${documentUrl}" target="_blank">${index + 1} ${documentId}</a>`;
+            });
+        }
 
-        // Use the globally stored response
-        popup.innerHTML = "<pre>" + JSON.stringify(globalResponse.response[index], null, 2) + "</pre>";
-        popup.style.display = "block";
+        function openPopup(index) {
+            var popup = document.getElementById("popup");
 
-        var overlay = document.querySelector(".overlay");
-        overlay.style.display = "block";
-    }
+            // Check if document_index is available in the response, assume 0 if not present
+            var documentIndex = globalResponse.response[index].hasOwnProperty("document_index")
+                ? globalResponse.response[index].document_index
+                : 0;
 
-    function closePopup() {
-        var popup = document.getElementById("popup");
-        popup.style.display = "none";
+            // Get the document content (title, URL, and metadata name) based on the assumed document_index
+            var documentContent = getDocumentContent(documentIndex, index);
 
-        var overlay = document.querySelector(".overlay");
-        overlay.style.display = "none";
-    }
-</script>
+            // If document content is available, display it along with the response content
+            if (documentContent) {
+                popup.innerHTML = "<a href=\"" + documentContent.url + "\">" + documentContent.title + "</a>" +
+    "<p>" + globalResponse.response[index].text + "</p>" +
+    "<p>" + globalResponse.response[index].score + "</p>";
 
-<!-- ... (remaining HTML code) ... -->
+            } else {
+                // If document content is not available, display only the response content
+                popup.innerHTML = "<p>" + globalResponse.response[index].text + "</p>" +
+                    "<p>" + globalResponse.response[index].score + "</p>";
+            }
+
+            popup.style.display = "block";
+
+            var overlay = document.querySelector(".overlay");
+            overlay.style.display = "block";
+        }
+
+        function getDocumentContent(index, responseIndex) {
+            // Check if the index is within bounds
+            if (index >= 0 && index < globalResponse.document.length) {
+                // Retrieve the document content (title and URL) based on the index
+                var documentInfo = globalResponse.document[index];
+                var metadataName = getMetadataValueByName(globalResponse.response[responseIndex].metadata, "title") || "";
+                var title = documentInfo.metadata.find(element => element.name === "title")?.value;
+                var url = documentInfo.metadata.find(element => element.name === "url")?.value || "#";
+
+                // Default to "#" if title is null or metadata name is not present
+                var metadataWithTitle = metadataName.trim() ? metadataName.trim() : "";
+
+                return {
+                    title: title,
+                    url: url.trim() ? url.trim() + "#" + metadataWithTitle : "#",
+                    metadataName: metadataName.trim()
+                };
+            }
+            return null;
+        }
+
+        function getMetadataValueByName(metadata, name) {
+            // Find the metadata value by name in the array
+            var metadataElement = metadata.find(element => element.name === name);
+            return metadataElement ? metadataElement.value.trim() : null;
+        }
+
+
+
+
+        function closePopup() {
+            var popup = document.getElementById("popup");
+            popup.style.display = "none";
+
+            var overlay = document.querySelector(".overlay");
+            overlay.style.display = "none";
+        }
+    </script>
+
+    <!-- ... (remaining HTML code) ... -->
 
 </body>
+
 </html>
