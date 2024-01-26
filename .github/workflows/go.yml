@@ -22,7 +22,7 @@ jobs:
         go-version: 1.21.4
 
     - name: Build
-      run: go build -o myapp
+      run: go build -o $GITHUB_WORKSPACE/myapp
 
   deploy:
     runs-on: ubuntu-latest
@@ -32,7 +32,7 @@ jobs:
     - name: Copy artifacts
       run: |
         mkdir -p $HOME/deploy
-        cp myapp $HOME/deploy/
+        cp $GITHUB_WORKSPACE/myapp $HOME/deploy/
 
     - name: Deploy to Oracle Cloud VM
       uses: appleboy/ssh-action@master
@@ -44,4 +44,5 @@ jobs:
           sudo systemctl stop vectara  # Stop your existing service if it's running
           cp $HOME/deploy/myapp /path/to/your/destination/
           sudo systemctl start vectara  # Start your service
+
 
