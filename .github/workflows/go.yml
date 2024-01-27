@@ -51,6 +51,6 @@ jobs:
         username: opc
         key: ${{ secrets.OC_SSH_KEY }}
         script: |
-          cp $GITHUB_WORKSPACE/myapp /home/opc/apps
+          cp $HOME/deploy/myapp /home/opc/apps
 
 
