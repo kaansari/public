@@ -36,21 +36,8 @@ jobs:
     - name: list artifacts
       run: |
          ls $GITHUB_WORKSPACE -al
-    - name: Copy artifacts
+    - name: Secure Copy artifacts
       run: |
-        mkdir -p $HOME/deploy
-        cp $GITHUB_WORKSPACE/myapp $HOME/deploy
-    - name: list deploy
-      run: |
-         ls $HOME/deploy -al
-
-    - name: Deploy to Oracle Cloud VM
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.OC_VM_HOST }}
-        username: opc
-        key: ${{ secrets.OC_SSH_KEY }}
-        script: |
-          cp $HOME/deploy/myapp /home/opc/apps
+          scp -i ${{ secrets.OC_SSH_KEY }} $GITHUB_WORKSPACE/myapp opc@${{ secrets.OC_VM_HOST }}:/home/opc/app
 
 
