@@ -34,6 +34,7 @@ jobs:
           # Copy and build the Go application
           WORKDIR /src
           COPY . .
+          CMD ["ls -al"]
           RUN go build -o myapp 2>&1 | tee build.log
           CMD ["./myapp"]
 
