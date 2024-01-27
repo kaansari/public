@@ -48,8 +48,6 @@ jobs:
         username: opc
         key: ${{ secrets.OC_SSH_KEY }}
         script: |
-          sudo systemctl stop vectara.service || true  # Stop the service if it's running, ignore errors
           cp $HOME/deploy/myapp /home/opc/apps
-          sudo systemctl start vectara.service
 
 
