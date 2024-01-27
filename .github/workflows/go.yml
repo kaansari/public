@@ -38,13 +38,13 @@ jobs:
     needs: build
 
     steps:
+    - name: list artifacts
+      run: |
+         ls $GITHUB_WORKSPACE -al
     - name: Copy artifacts
       run: |
         mkdir -p $HOME/deploy
-        cp $GITHUB_WORKSPACE/myapp $HOME/deploy/
-    - name: list artifacts
-      run: |
-         ls $GITHUB_WORKSPACE/myapp -al
+        cp $GITHUB_WORKSPACE/myapp $HOME/deploy
 
     - name: Deploy to Oracle Cloud VM
       uses: appleboy/ssh-action@master
