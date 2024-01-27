@@ -86,9 +86,6 @@ func initializeGRPCClient() (*grpc.ClientConn, error) {
 	return conn, nil
 }
 
-// ... (previous code)
-// ... (previous code)
-
 func queryHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodOptions {
 		// Respond to preflight requests
@@ -137,37 +134,6 @@ func queryHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResponse)
 }
 
-func queryVectara(w http.ResponseWriter, r *http.Request) {
-	var payload QueryPayload
-	err := json.NewDecoder(r.Body).Decode(&payload)
-	if err != nil {
-		http.Error(w, "Error decoding JSON payload", http.StatusBadRequest)
-		return
-	}
-
-	// Access the searchQuery from the payload
-	searchQuery := payload.SearchQuery
-	log.Printf("searchQuery?" + searchQuery)
-	result, err := callVectara(searchQuery)
-	if err != nil {
-		log.Printf("Error calling Vectara: %v", err)
-		http.Error(w, fmt.Sprintf("Error calling Vectara: %v", err), http.StatusInternalServerError)
-		return
-	}
-
-	jsonResponse, err := json.Marshal(result)
-	if err != nil {
-		log.Printf("Error marshaling JSON response: %v", err)
-		http.Error(w, fmt.Sprintf("Error marshaling JSON response: %v", err), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(jsonResponse)
-}
-
-// TokenAuth struct and methods
-
 type tokenAuth struct {
 	token      string
 	apiKey     string
@@ -192,21 +158,6 @@ func (tokenAuth) RequireTransportSecurity() bool {
 // CallVectara function
 func callVectara(searchString string) (*serving.ResponseSet, error) {
 	flag.Parse()
-
-	creds, err := credentials.NewClientTLSFromFile(certFile, "")
-	if err != nil {
-		return nil, fmt.Errorf("failed to load TLS credentials: %v", err)
-	}
-
-	conn, err := grpc.Dial(*addr, grpc.WithTransportCredentials(creds), grpc.WithPerRPCCredentials(tokenAuth{
-		customerID: customerID,
-		xAPIKey:    xAPIKey,
-		corpusID:   corpusID,
-	}))
-	if err != nil {
-		return nil, fmt.Errorf("did not connect: %v", err)
-	}
-	defer conn.Close()
 
 	rlambda := serving.LinearInterpolation{
 		Lambda: float32(Lambda),
@@ -248,22 +199,4 @@ func callVectara(searchString string) (*serving.ResponseSet, error) {
 	}
 
 	return nil, fmt.Errorf("response structure does not contain the expected data")
-}
-
-func enableCORS(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Allow all origins, you might want to specify your allowed origins
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-
-		// Handle preflight requests
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-
-		// Continue with the next handler in the chain
-		next.ServeHTTP(w, r)
-	})
 }
