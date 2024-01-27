@@ -40,6 +40,9 @@ jobs:
       run: |
         mkdir -p $HOME/deploy
         cp $GITHUB_WORKSPACE/myapp $HOME/deploy
+    - name: list deploy
+      run: |
+         ls $HOME/deploy -al
 
     - name: Deploy to Oracle Cloud VM
       uses: appleboy/ssh-action@master
