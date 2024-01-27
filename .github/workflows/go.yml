@@ -24,6 +24,12 @@ jobs:
     - name: Go Mod
       run: go mod tidy
 
+    - name: Install dependencies
+      run: |
+          go get .
+          go get github.com/golang/protobuf
+          go get google.golang.org/grpc/credentials
+
     - name: Build
       run: go build -o $GITHUB_WORKSPACE/myapp
 
