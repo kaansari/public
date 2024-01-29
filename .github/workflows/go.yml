@@ -34,7 +34,6 @@ jobs:
       run: |
         mkdir -p $GITHUB_WORKSPACE/build/key
         cp -R key/* $GITHUB_WORKSPACE/build/key/
-        cp vectara.cer $GITHUB_WORKSPACE/build/key/
 
     - name: Build
       run: go build -o $GITHUB_WORKSPACE/build/myapp
