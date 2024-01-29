@@ -1,6 +1,5 @@
 # This workflow will build a golang project
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
-
 name: Build and Deploy
 
 on:
@@ -34,6 +33,7 @@ jobs:
       run: |
         mkdir -p $GITHUB_WORKSPACE/build/key
         cp -R key/* $GITHUB_WORKSPACE/build/key/
+        cp vectara.cer $GITHUB_WORKSPACE/build/key/
 
     - name: Build
       run: go build -o $GITHUB_WORKSPACE/build/myapp
@@ -61,7 +61,7 @@ jobs:
         username: ubuntu
         key: ${{ secrets.OC_SSH_KEY }}
         script: |
-         [Unit]
+          echo "[Unit]
           Description=Vectara Service
           After=network.target
 
@@ -73,10 +73,8 @@ jobs:
           WorkingDirectory=/home/ubuntu  # Set the working directory to the location of myapp
 
           [Install]
-          WantedBy=multi-user.target
-
-          [Install]
           WantedBy=multi-user.target" | sudo tee /etc/systemd/system/vectara.service
 
           sudo systemctl daemon-reload
           sudo systemctl start vectara.service
+
