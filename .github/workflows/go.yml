@@ -61,7 +61,7 @@ jobs:
         username: ubuntu
         key: ${{ secrets.OC_SSH_KEY }}
         script: |
-          echo "[Unit]
+         [Unit]
           Description=Vectara Service
           After=network.target
 
@@ -70,6 +70,10 @@ jobs:
           Restart=always
           RestartSec=3
           LimitNOFILE=4096
+          WorkingDirectory=/home/ubuntu  # Set the working directory to the location of myapp
+
+          [Install]
+          WantedBy=multi-user.target
 
           [Install]
           WantedBy=multi-user.target" | sudo tee /etc/systemd/system/vectara.service
